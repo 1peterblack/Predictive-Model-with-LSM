@@ -1,0 +1,99 @@
+## Predictive Model in R for airquality dataset
+
+## Load libraries
+library(ggplot2)
+library(dplyr)
+
+
+## 1. Load dataset
+data <- airquality
+
+## 2. View dataset
+View(data)
+str(data)
+head(data)
+summary(data)
+
+
+## 3. Preprocess the dataset
+is.na(data)
+
+
+## 4. Replace the NA elements based on the index with mean of that value
+data[] <- lapply(data, function(x) replace(x, is.na(x), mean(x, na.rm = TRUE)))
+
+
+## 5. Input monthly mean in Ozone
+for (i in 1:nrow(data)){
+  if(is.na(data[i,"Ozone"])){
+    data[i,"Ozone"] <- mean(data[which(data[,"Month"]==data[i,"Month"]),"Ozone"],na.rm = TRUE)
+  }
+
+
+## 6. Input monthly mean in Solar.R
+
+if(is.na(data[i,"Solar.R"])){
+  data[i,"Solar.R"] <- mean(data[which(data[,"Month"]==data[i,"Month"]),"Solar.R"],na.rm = TRUE)
+}
+
+View(data)
+
+## 7. Normalize data
+ normalize <- function(x){
+    return((x-min(x))/(max(x)-min(x)))
+  }
+
+## 8. Reassign normalized data
+data <- normalize(data)
+
+## 9. View dataset
+View(data)
+head(data)
+str(data)
+
+
+### Apply linear regression algorithm using Least Squares Method on “Ozone” and “Solar.R”
+## 10. select Target
+Y <- data[,"Ozone"] 
+
+## 11. select Predictor 
+X <- data[,"Solar.R"]
+
+
+### model1 
+## 12. provides regression line coefficients i.e. slope and y-intercept
+model1 <- lm(Y~X)
+
+
+## 13. scatter plot between X and Y
+plot(Y~X) 
+
+## 14. Add regression line to scatter plot to see relationship between X and Y
+abline(model1, col="blue", lwd=3) 
+
+###  Apply linear regression algorithm using Least Squares Method on “Ozone” and “Wind”
+## 15. select Target
+Y <- data[,"Ozone"] 
+
+## 16. select Predictor 
+X <- data[,"Wind"] 
+
+
+### model2
+## 17. provides regression line coefficients i.e. slope and y-intercept 
+model2 <- lm(Y~X)
+
+## 18. scatter plot between X and Y
+plot(Y~X) 
+
+## 19. add regression line to scatter plot to see relationship between X and Y
+abline(model2, col="blue", lwd=3) 
+
+###  Perform prediction
+## 20. Prediction of 'Ozone' when 'Solar.R'= 10
+p1 <- predict(model1,data.frame("X"=10))
+p1
+
+## 21. Prediction of 'Ozone' when 'Wind'= 5
+p2<- predict(model2,data.frame("X"=5))
+p2
